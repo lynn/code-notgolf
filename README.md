@@ -1,2 +1,2 @@
 # code-notgolf
-Reference implementations of hard code.golf holes
+Reference implementations of hard https://code.golf holes
