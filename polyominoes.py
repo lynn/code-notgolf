@@ -1,34 +1,29 @@
-polyominoes = []
-
 # Start with polyominoes with every point on the top row.
-for i in range(5):
-  grid = [[' '] * 6 for _ in range(6)]
-  grid[0][i] = '#'
-  polyominoes.append(grid)
+# Store the polyominoes as a list of points.
+polyominoes = [frozenset([(i, 0)]) for i in range(5)]
 
 
 while polyominoes:
-  grid = polyominoes.pop(0)
+  points = polyominoes.pop(0)
 
   # Only print if there is a # in the first column (otherwise there would be leading whitespace)
-  if any(x[0] == '#' for x in grid):
-    print('\n'.join(''.join(x) for x in grid).rstrip() + '\n')
-  
-  # If it's already size 6, it's maximal size, so we don't need to generate any polyominoes from it.
-  if sum(x.count('#') for x in grid) == 6:
+  # Note: If there's leading whitespace, there is guaranteed to be an equivalent polyomino without leading whitespace
+  if any(x == 0 for x, _ in points):
+    grid = [[' '] * 6 for _ in range(6)]
+    for x, y in points:
+      grid[x][y] = '#'
+    print('\n'.join(''.join(x).rstrip(' ') for x in grid).rstrip('\n') + '\n')
+
+  # If it's already size 6, it's maximal size, so we don't need to generate any more polyominoes from it.
+  if len(points) == 6:
     continue
 
-  # Loop over every # in the polyomino
-  for i0, row in enumerate(grid):
-    for j0 in range(6):
-      if row[j0] == ' ':
-        continue
-
-      # Loop over all of its neighbors, to find a point that can be added
-      for i1, j1 in [(i0, j0 - 1), (i0, j0 + 1), (i0 - 1, j0), (i0 + 1, j0)]:
-        # Make sure it's within bounds and not already a #
-        if 0 <= i1 < 6 and 0 <= j1 < 6 and grid[i1][j1] == ' ':
-          grid2 = [x[:] for x in grid]
-          grid2[i1][j1] = '#'
-          if grid2 not in polyominoes:
-            polyominoes.append(grid2)
+  # Loop over every point in the polyomino
+  for x, y in points:
+    # Loop over all of its neighbors, to find a point that can be added
+    for x1, y1 in [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]:
+      # Make sure it's within bounds and not already in the polyomino
+      if 0 <= x1 < 6 and 0 <= y1 < 6 and (x1, y1) not in points:
+        new_points = points | frozenset([(x1, y1)])
+        if new_points not in polyominoes:
+          polyominoes.append(new_points)
